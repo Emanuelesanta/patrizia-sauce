@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patrizia's Sauce: Digital Launch Strategy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Patrizia's Logo Colors - Background Light Gray (#F0F0F0), Dark Text/Primary Black (#333333), Accent Orange (#FFA000), Lighter Gray Accent (#E0E0E0) -->
+    <!-- Application Structure Plan: A top-down, narrative-driven single page application designed to walk the user through a persuasive pitch. The structure is: 1. Hero section with subtle background image and personalized expertise. 2. A 'Current vs. Future' state comparison to quickly establish the problem and value. 3. An interactive image carousel featuring the sauce jars. 4. An interactive tabbed section for the two-part solution (Shopify & AI) to allow focused exploration. 5. A visual, interactive timeline for the implementation plan. 6. A dynamic grid for outcomes to highlight benefits with numbers. 7. A simplified investment section with clear cost breakdowns. 8. A final call-to-action. This non-linear but guided flow emphasizes visuals and numbers for an old-school client. -->
+    <!-- Visualization & Content Choices: 1. Hero Background (Atmosphere): Uses a publicly hosted image. 2. Current/Future State (Inform/Compare): Uses static columns with text-based check/cross marks. 3. Image Carousel (Engagement): A simple JavaScript-driven image carousel showcases sauce jars with publicly hosted links, ensuring the entire jar is visible. 4. Solution (Organize/Inform): Uses interactive tabs. 5. Timeline (Change/Process): An interactive hover-based timeline. 6. Outcomes (Inform/Impact): Uses a grid of cards with clear headings and numerical insights, no emojis. 7. Investment (Detailed Breakdown): Replaced the chart with a direct, formatted text summary of one-time and monthly costs, as provided by the user, for clarity and simplicity. This directly addresses the need for a numbers-focused, low-budget view. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #F0F0F0; /* Light Gray from logo background */
+            color: #333333; /* Darker gray for general text */
+        }
+        h1, h2, h3, .font-heading {
+            font-family: 'Tinos', serif;
+            color: #000000; /* Pure black for headings */
+        }
+        .active-tab {
+            background-color: #FFA000; /* Orange from logo */
+            color: #FFFFFF;
+        }
+        .inactive-tab {
+            background-color: #E0E0E0; /* Lighter Gray Accent */
+            color: #333333;
+        }
+        .timeline-item .timeline-content {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            transform: translateY(10px);
+        }
+        .timeline-item:hover .timeline-content {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .benefit-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .benefit-card:hover {
+            transform: translateY(-5px);
+        }
+        .chart-container { /* This style is no longer used for a Chart.js canvas but kept for conceptual context */
+            position: relative;
+            width: 100%;
+            margin: auto;
+        }
+        /* Specific styles for check/cross marks */
+        .check-mark { color: #008000; font-weight: bold; margin-right: 0.75rem; } /* Standard Green */
+        .cross-mark { color: #FF0000; font-weight: bold; margin-right: 0.75rem; } /* Standard Red */
+
+        /* Image Carousel Specific Styles */
+        .jar-carousel {
+            position: relative;
+            width: 100%;
+            max-width: 280px; /* Adjusted to be a bit wider */
+            height: 280px; /* Adjusted to be square */
+            margin: 4rem auto;
+            overflow: hidden;
+            border-radius: 0.75rem; /* rounded-lg */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+            background-color: #F0F0F0; /* Background for when object-fit is 'contain' */
+        }
+        .jar-image {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Remains 'contain' to show entire image */
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        .jar-image.active {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <nav id="navbar" class="bg-[#F0F0F0]/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <!-- Patrizia's Logo -->
+                    <img src="https://i.ibb.co/7M5jfQ3/12400-Patrizias-Brush.png" alt="Patrizia's Logo Brushstroke Style" class="h-16 w-auto object-contain py-1">
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#vision" class="text-[#333333] hover:bg-[#FFA000] hover:text-white px-3 py-2 rounded-md text-sm font-medium">The Vision</a>
+                        <a href="#strategy" class="text-[#333333] hover:bg-[#FFA000] hover:text-white px-3 py-2 rounded-md text-sm font-medium">The Strategy</a>
+                        <a href="#plan" class="text-[#333333] hover:bg-[#FFA000] hover:text-white px-3 py-2 rounded-md text-sm font-medium">The Plan</a>
+                        <a href="#impact" class="text-[#333333] hover:bg-[#FFA000] hover:text-white px-3 py-2 rounded-md text-sm font-medium">The Impact</a>
+                        <a href="#investment" class="text-[#333333] hover:bg-[#FFA000] hover:text-white px-3 py-2 rounded-md text-sm font-medium">The Investment</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-[#333333] hover:bg-[#FFA000] hover:text-white focus:outline-none">
+                        <span class="sr-only">Open main menu</span>
+                        <div class="space-y-1.5">
+                            <span class="block w-6 h-0.5 bg-[#333333]"></span>
+                            <span class="block w-6 h-0.5 bg-[#333333]"></span>
+                            <span class="block w-6 h-0.5 bg-[#333333]"></span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#vision" class="text-[#333333] hover:bg-[#FFA000] hover:text-white block px-3 py-2 rounded-md text-base font-medium">The Vision</a>
+                <a href="#strategy" class="text-[#333333] hover:bg-[#FFA000] hover:text-white block px-3 py-2 rounded-md text-base font-medium">The Strategy</a>
+                <a href="#plan" class="text-[#333333] hover:bg-[#FFA000] hover:text-white block px-3 py-2 rounded-md text-base font-medium">The Plan</a>
+                <a href="#impact" class="text-[#333333] hover:bg-[#FFA000] hover:text-white block px-3 py-2 rounded-md text-base font-medium">The Impact</a>
+                <a href="#investment" class="text-[#333333] hover:bg-[#FFA000] hover:text-white block px-3 py-2 rounded-md text-base font-medium">The Investment</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section id="hero" class="py-20 md:py-32 bg-cover bg-center relative" style="background-image: url('https://i.ibb.co/yBbhzM5T/Sugo-nella-pentola-di-acciaio.jpg');">
+            <div class="absolute inset-0 bg-white opacity-90"></div> <!-- Subtle overlay for text readability -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+                <h1 class="text-4xl md:text-6xl font-bold font-heading text-[#FFA000] leading-tight drop-shadow-md">Bring Patrizia's Sauce Online: <br class="hidden md:block"> Direct to Your Door!</h1>
+                <p class="mt-6 max-w-3xl mx-auto text-lg md:text-xl text-[#333333] drop-shadow-sm">With Emanuele's decade of Shopify experience and Alberto's expertise in AI marketing, we propose launching Patrizia's famous sauce directly to customers, powered by smart marketing.</p>
+                <a href="#vision" class="mt-8 inline-block bg-[#FFA000] text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-[#CC8000] transition duration-300">Get Started!</a>
+            </div>
+        </section>
+
+        <section id="vision" class="py-16 bg-[#F0F0F0]">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-heading font-bold text-[#000000]">Our Sauce Vision: From Kitchen to Global Reach</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-[#333333]">Where Patrizia's sauce stands now, and where it's headed. Our goal is to make Patrizia's sauce a household name, delivered easily to homes everywhere.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+                    <div class="bg-[#FFFFFF] p-8 rounded-lg shadow-md border border-gray-200">
+                        <h3 class="text-2xl font-heading font-bold text-center text-[#FFA000] mb-4">Current Scene: Patrizia's Sauce is a Hidden Gem!</h3>
+                        <ul class="space-y-4 text-gray-600">
+                            <li class="flex items-start"><span class="cross-mark">✗</span><span>Minimal revenue from sauce sales; primarily sold at the Staten Island location.</span></li>
+                            <li class="flex items-start"><span class="cross-mark">✗</span><span>No dedicated online store or active social media presence for the sauce.</span></li>
+                            <li class="flex items-start"><span class="cross-mark">✗</span><span>Untapped potential for direct customer engagement and loyalty programs for sauce enthusiasts.</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-[#FFFFFF] p-8 rounded-lg shadow-lg border-2 border-[#FFA000]">
+                        <h3 class="text-2xl font-heading font-bold text-center text-[#000000] mb-4">Future View: Sauce for Everyone!</h3>
+                         <ul class="space-y-4 text-[#333333]">
+                            <li class="flex items-start"><span class="check-mark">✔</span><span>A fantastic Shopify store just for Patrizia's sauce, easy to buy and ship.</span></li>
+                            <li class="flex items-start"><span class="check-mark">✔</span><span>Direct customer relationships for exclusive sauce deals and new product alerts.</span></li>
+                            <li class="flex items-start"><span class="check-mark">✔</span><span>AI-powered social media to make Patrizia's sauce famous on Instagram and beyond.</span></li>
+                            <li class="flex items-start"><span class="check-mark">✔</span><span>New revenue from direct sauce sales and branded sauce merchandise.</span></li>
+                            <li class="flex items-start"><span class="check-mark">✔</span><span>Emanuele will lead the charge to get Patrizia's sauce into big chains like Walmart and Costco!</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="sauce-showcase" class="py-16 bg-[#F0F0F0] text-center">
+            <h2 class="text-3xl md:text-4xl font-heading font-bold text-[#000000] mb-8">Our Signature Jars in Motion</h2>
+            <p class="max-w-2xl mx-auto text-lg text-[#333333] mb-8">See the quality and branding of Patrizia's sauce jars, designed for shelf appeal and customer satisfaction.</p>
+            <div class="jar-carousel">
+                <img id="jar-image-1" src="https://i.ibb.co/BKnDvsfn/patriziajar.png" alt="Patrizia's Tomato Sauce Jar" class="jar-image active">
+                <img id="jar-image-2" src="https://i.ibb.co/pBL2x0Yq/jar2.png" alt="Patrizia's Marinara Sauce Jar" class="jar-image">
+            </div>
+        </section>
+
+        <section id="strategy" class="py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-heading font-bold text-[#000000]">Our Sauce Strategy: Shopify & AI</h2>
+                     <p class="mt-4 max-w-2xl mx-auto text-lg text-[#333333]">We're building this transformation on two solid foundations. Click to see how Shopify will get Patrizia's sauce to homes, and how AI, with Alberto Mastrotto's guidance, will make its marketing pop!</p>
+                </div>
+                <div>
+                    <div class="flex justify-center mb-6 rounded-lg p-1 bg-[#E0E0E0] max-w-md mx-auto">
+                        <button id="tab-shopify" class="tab-btn w-1/2 py-2 px-4 rounded-md text-lg font-semibold transition-colors duration-300 active-tab">Shopify Sales</button>
+                        <button id="tab-ai" class="tab-btn w-1/2 py-2 px-4 rounded-md text-lg font-semibold transition-colors duration-300 inactive-tab">AI for Instagram</button>
+                    </div>
+
+                    <div id="content-shopify" class="tab-content bg-white p-8 rounded-lg shadow-lg">
+                        <h3 class="text-2xl font-heading font-bold mb-4 text-[#FFA000]">Getting Sauce Sales Flowing with Shopify</h3>
+                        <p class="mb-6 text-[#333333]">With Emanuele's almost decade of Shopify experience, we'll build an easy-to-use online store specifically for Patrizia's sauce. Think direct sales, no fuss!</p>
+                        <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 list-disc list-inside text-gray-700">
+                            <li><strong>Direct Sauce Orders:</strong> Simple online purchasing for bottles and bundles.</li>
+                            <li><strong>Sauce Subscriptions:</strong> Regular deliveries for Patrizia's biggest fans, building recurring revenue.</li>
+                            <li><strong>Sauce Gift Sets:</strong> Beautifully packaged sets for holidays and special occasions.</li>
+                            <li><strong>Loyalty Programs:</strong> Rewards for repeat sauce buyers, encouraging more purchases.</li>
+                            <li><strong>Inventory Management:</strong> Keep track of sauce stock easily and efficiently.</li>
+                            <li><strong>Shipping Integration:</strong> Smooth delivery of Patrizia's delicious sauce right to the customer's door.</li>
+                        </ul>
+                    </div>
+
+                    <div id="content-ai" class="tab-content bg-white p-8 rounded-lg shadow-lg hidden">
+                        <h3 class="text-2xl font-heading font-bold mb-4 text-[#FFA000]">Supercharging Sauce Marketing with AI</h3>
+                        <p class="mb-6 text-[#333333]">Alberto Mastrotto, with his big company AI expertise, will help us automate marketing strategies, making Patrizia's sauce a social media sensation, especially on Instagram!</p>
+                        <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 list-disc list-inside text-gray-700">
+                            <li><strong>AI Instagram Content:</strong> Generate catchy captions and mouth-watering post ideas for Patrizia's sauce.</li>
+                            <li><strong>Smart Posting Times:</strong> AI finds the best times to post on Instagram for maximum views and engagement.</li>
+                            <li><strong>Targeted Sauce Ads:</strong> Our ads reach exactly the right people who'll love Patrizia's sauce.</li>
+                            <li><strong>Trend Spotting:</strong> AI helps us jump on trending food content that relates to Patrizia's sauce.</li>
+                             <li><strong>Performance Insights:</strong> Clear data on how Patrizia's sauce marketing is performing.</li>
+                            <li><strong>Customer Q&A Chatbot:</strong> Instant answers for sauce inquiries and order tracking.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="plan" class="py-16 bg-[#E0E0E0]">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-heading font-bold text-[#000000]">The Sauce Launch Plan: Step-by-Step</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-[#333333]">We've got a clear two-phase plan to roll out Patrizia's sauce online smoothly. Hover over each step to see what's happening and when.</p>
+                </div>
+                <div class="relative">
+                    <div class="absolute left-1/2 h-full w-0.5 bg-[#FFA000] -translate-x-1/2"></div>
+                    <div class="space-y-16">
+                        <div class="flex justify-start items-center timeline-item">
+                            <div class="w-5/12">
+                                <div class="bg-white p-6 rounded-lg shadow-md text-right">
+                                    <h3 class="font-bold text-xl font-heading text-[#FFA000]">Phase 1: Shopify Sauce Store Setup</h3>
+                                    <p class="font-semibold text-gray-500">Weeks 1-8</p>
+                                    <div class="timeline-content mt-2 text-gray-600">
+                                        Building the online store, listing all sauce products, setting up shipping, and payment systems.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="w-2/12 flex justify-center">
+                                <div class="w-6 h-6 rounded-full bg-[#FFA000] border-4 border-white shadow-md"></div>
+                            </div>
+                            <div class="w-5/12"></div>
+                        </div>
+
+                        <div class="flex justify-end items-center timeline-item">
+                            <div class="w-5/12"></div>
+                            <div class="w-2/12 flex justify-center">
+                                <div class="w-6 h-6 rounded-full bg-[#FFA000] border-4 border-white shadow-md"></div>
+                            </div>
+                            <div class="w-5/12">
+                                <div class="bg-white p-6 rounded-lg shadow-md text-left">
+                                    <h3 class="font-bold text-xl font-heading text-[#FFA000]">Phase 2: AI Sauce Marketing Launch</h3>
+                                    <p class="font-semibold text-gray-500">Weeks 3-12</p>
+                                     <div class="timeline-content mt-2 text-gray-600">
+                                        Implementing AI tools for content, scheduling, and ads, focusing heavily on Instagram to promote the sauce.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="impact" class="py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-heading font-bold text-[#000000]">The Delicious Outcomes & Benefits for Sauce</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-[#333333]">This isn't just about selling sauce; it's about seeing real results. Here's how we expect this plan to significantly boost Patrizia's sauce performance:</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="benefit-card bg-white p-6 rounded-lg shadow-md border border-transparent hover:border-[#FFA000]">
+                        <div class="text-4xl mb-3 text-[#FFA000] font-bold">Sales Growth</div>
+                        <h3 class="font-bold text-xl font-heading mb-2 text-[#FFA000]">Sauce Sales Skyrocket (15-30% Growth)</h3>
+                        <p class="text-gray-600">Expect a significant increase in direct online sauce orders. Industry data shows brands adopting direct online sales can see <strong>15-30% growth</strong> in digital revenue.</p>
+                    </div>
+                    <div class="benefit-card bg-white p-6 rounded-lg shadow-md border border-transparent hover:border-[#FFA000]">
+                        <div class="text-4xl mb-3 text-[#FFA000] font-bold">Loyalty Boost</div>
+                        <h3 class="font-bold text-xl font-heading mb-2 text-[#FFA000]">Happier Sauce Fans (20% Boost in Loyalty)</h3>
+                        <p class="text-gray-600">A smooth buying experience and responsive AI support means happier sauce customers. This translates to an estimated <strong>20% boost in customer loyalty</strong> and repeat purchases.</p>
+                    </div>
+                    <div class="benefit-card bg-white p-6 rounded-lg shadow-md border border-transparent hover:border-[#FFA000]">
+                        <div class="text-4xl mb-3 text-[#FFA000] font-bold">Wider Reach</div>
+                        <h3 class="font-bold text-xl font-heading mb-2 text-[#FFA000]">Wider Sauce Reach (35%+ Engagement)</h3>
+                        <p class="text-gray-600">AI-powered social media will make Patrizia's sauce visible to new audiences. Brands using AI for content see up to <strong>35% higher engagement rates</strong> on platforms like Instagram.</p>
+                    </div>
+                    <div class="benefit-card bg-white p-6 rounded-lg shadow-md border border-transparent hover:border-[#FFA000]">
+                        <div class="text-4xl mb-3 text-[#FFA000] font-bold">Smarter Ops</div>
+                        <h3 class="font-bold text-xl font-heading mb-2 text-[#FFA000]">Smarter Sauce Operations (25% Time Savings)</h3>
+                        <p class="text-gray-600">Automating marketing and streamlining sauce order fulfillment means the team saves time – potentially <strong>25% more efficient</strong> – letting them focus on making great sauce.</p>
+                    </div>
+                     <div class="benefit-card bg-white p-6 rounded-lg shadow-md border border-transparent hover:border-[#FFA000]">
+                        <div class="text-4xl mb-3 text-[#FFA000] font-bold">Key Insights</div>
+                        <h3 class="font-bold text-xl font-heading mb-2 text-[#FFA000]">Insights for Sauce Growth (Better Decisions)</h3>
+                        <p class="text-gray-600">We'll get clear data on what sauce flavors and marketing campaigns are performing best, allowing us to make smart, data-driven decisions.</p>
+                    </div>
+                    <div class="benefit-card bg-white p-6 rounded-lg shadow-md border clear-start hover:border-[#FFA000]">
+                        <div class="text-4xl mb-3 text-[#FFA000] font-bold">Brand Love</div>
+                        <h3 class="font-bold text-xl font-heading mb-2 text-[#FFA000]">More Sauce, More Love!</h3>
+                        <p class="text-gray-600">By making Patrizia's sauce easy to find and buy online, we'll deepen connections with existing fans and welcome new ones to the Patrizia's sauce family.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="investment" class="py-16 bg-[#E0E0E0]">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-heading font-bold text-[#000000]">The Sauce Investment: What We'll Need</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-[#333333]">This is a high-level look at where resources will go to get Patrizia's sauce booming online. The return will be huge!</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
+                    <!-- One-Time Setup Costs -->
+                    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                        <h3 class="text-2xl font-heading font-bold text-center text-[#FFA000] mb-4">✅ One-Time Setup (Start-Up Costs)</h3>
+                        <ul class="space-y-3 text-gray-700">
+                            <li class="flex justify-between"><span>Domain name (yourshop.com)</span><span class="font-bold">~$15/year</span></li>
+                            <li class="flex justify-between"><span>Free Shopify Theme</span><span class="font-bold">$0</span></li>
+                            <li class="flex justify-between"><span>Logo (DIY or simple)</span><span class="font-bold">Free or ~$50</span></li>
+                            <li class="flex justify-between"><span>Product photos (smartphone or DIY)</span><span class="font-bold">Free or ~$100</span></li>
+                        </ul>
+                        <div class="mt-6 pt-4 border-t border-gray-200 text-right">
+                            <span class="font-bold text-lg text-[#000000]">🔹 Total Start-Up Cost: Around $100–$150</span>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Running Costs -->
+                    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                        <h3 class="text-2xl font-heading font-bold text-center text-[#FFA000] mb-4">✅ Monthly Running Costs</h3>
+                        <ul class="space-y-3 text-gray-700">
+                            <li class="flex justify-between"><span>Shopify Basic Plan</span><span class="font-bold">$39/month</span></li>
+                            <li class="flex justify-between"><span>Apps (optional)</span><span class="font-bold">$0–$20/month</span></li>
+                            <li class="flex justify-between"><span>Ads (Instagram/Facebook)</span><span class="font-bold">Start with $100/month</span></li>
+                        </ul>
+                        <div class="mt-6 pt-4 border-t border-gray-200 text-right">
+                            <span class="font-bold text-lg text-[#000000]">🔹 Total Monthly Cost: About $150–$160</span>
+                        </div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="md:col-span-2 mt-8 p-6 bg-white rounded-lg shadow-md border border-gray-200">
+                        <h3 class="text-2xl font-heading font-bold text-center text-[#FFA000] mb-4">💡 Summary</h3>
+                        <p class="text-lg text-[#333333] text-center">
+                            You can launch your Shopify store for around **$150 to start** and keep it running for about **$150/month with small ads.**
+                        </p>
+                        <p class="mt-4 text-center text-gray-600 text-sm">
+                            Let us know if you want help picking a free theme or setting up the first product page!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="bg-[#000000] text-white py-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                 <h2 class="text-3xl font-heading font-bold">Ready to Get Patrizia's Sauce Out There?</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-300">Let's chat about making Patrizia's famous sauce a digital success story!</p>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.tab-btn');
+            const contents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => {
+                        t.classList.remove('active-tab');
+                        t.classList.add('inactive-tab');
+                    });
+                    tab.classList.add('active-tab');
+                    tab.classList.remove('inactive-tab');
+
+                    contents.forEach(content => {
+                        content.classList.add('hidden');
+                    });
+
+                    const activeContentId = 'content-' + tab.id.split('-')[1];
+                    document.getElementById(activeContentId).classList.remove('hidden');
+                });
+            });
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            const mobileNavLinks = document.querySelectorAll('#mobile-menu a');
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+            
+            const navLinks = document.querySelectorAll('nav a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                     if (link.hash !== "") {
+                        e.preventDefault();
+                        const hash = link.hash;
+                        const targetElement = document.querySelector(hash);
+                        if(targetElement) {
+                             const navHeight = document.getElementById('navbar').offsetHeight;
+                             const elementPosition = targetElement.getBoundingClientRect().top;
+                             const offsetPosition = elementPosition + window.pageYOffset - navHeight;
+
+                             window.scrollTo({
+                                 top: offsetPosition,
+                                 behavior: "smooth"
+                             });
+                        }
+                     }
+                });
+            });
+
+            // Jar carousel functionality
+            const jarImages = [
+                "https://i.ibb.co/BKnDvsfn/patriziajar.png", // Path for patriziajar.jpg
+                "https://i.ibb.co/pBL2x0Yq/jar2.png"  // Path for jar2.jpg
+            ];
+            let currentJarIndex = 0;
+            const jarImage1 = document.getElementById('jar-image-1');
+            const jarImage2 = document.getElementById('jar-image-2');
+
+            function updateJarCarousel() {
+                const prevIndex = currentJarIndex;
+                currentJarIndex = (currentJarIndex + 1) % jarImages.length;
+
+                const currentActiveImage = document.querySelector('.jar-image.active');
+                if (currentActiveImage) {
+                    currentActiveImage.classList.remove('active');
+                }
+
+                if (currentJarIndex === 0) {
+                    jarImage1.classList.add('active');
+                } else {
+                    jarImage2.classList.add('active');
+                }
+            }
+
+            // Set initial images and start interval
+            jarImage1.src = jarImages[0];
+            jarImage2.src = jarImages[1];
+            jarImage1.classList.add('active'); // Ensure first image is active initially
+            setInterval(updateJarCarousel, 3000); // Change image every 3 seconds
+
+            // Removed Chart.js initialization as it's no longer used for the investment section.
+
+            const benefitCards = document.querySelectorAll('.benefit-card');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        entry.target.style.opacity = 1;
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            benefitCards.forEach(card => {
+                card.style.opacity = 0;
+                card.style.transform = 'translateY(20px)';
+                observer.observe(card);
+            });
+        });
+    </script>
+</body>
+</html>
